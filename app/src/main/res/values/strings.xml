@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Ваш Публичный IP</string>
+    <string name="label_your_ip">Ваш IP:</string>
+    <string name="btn_refresh">Обновить</string>
+    <string name="label_select_source">Выберите источник IP:</string>
+    <string name="btn_configure">Настроить…</string>
+    <string name="dialog_title">Пользовательский источник</string>
+    <string name="dialog_hint">https://example.com</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Отмена</string>
+    <string name="error_timeout">Ошибка ожидания (превышено 5 сек)</string>
+    <string name="error_generic">Ошибка: %s</string>
+    <string name="loading">Загрузка…</string>
+    <string name="unknown_location">Неизвестное местоположение</string>
+
+    <string-array name="ip_sources">
+        <item>ipify.org</item>
+        <item>icanhazip.com</item>
+        <item>ifconfig.me</item>
+        <item>ident.me</item>
+        <item>seeip.org</item>
+        <item>wtfismyip.com</item>
+        <item>v4.ident.me</item>
+        <item>checkip.amazonaws.com</item>
+        <item>ip.tyk.nu</item>
+        <item>wgetip.com</item>
+        <item>Пользовательский…</item>
+    </string-array>
+</resources>

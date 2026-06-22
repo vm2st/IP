@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Your Public IP</string>
+    <string name="label_your_ip">Your IP:</string>
+    <string name="btn_refresh">Refresh</string>
+    <string name="label_select_source">Select IP Source:</string>
+    <string name="btn_configure">Configure…</string>
+    <string name="dialog_title">Custom Source</string>
+    <string name="dialog_hint">https://example.com</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="error_timeout">Connection timeout (5s exceeded)</string>
+    <string name="error_generic">Error: %s</string>
+    <string name="loading">Loading…</string>
+    <string name="unknown_location">Unknown location</string>
+
+    <string-array name="ip_sources">
+        <item>ipify.org</item>
+        <item>icanhazip.com</item>
+        <item>ifconfig.me</item>
+        <item>ident.me</item>
+        <item>seeip.org</item>
+        <item>wtfismyip.com</item>
+        <item>v4.ident.me</item>
+        <item>checkip.amazonaws.com</item>
+        <item>ip.tyk.nu</item>
+        <item>wgetip.com</item>
+        <item>Custom…</item>
+    </string-array>
+</resources>

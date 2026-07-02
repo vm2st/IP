@@ -24,7 +24,7 @@
         style="?android:attr/progressBarStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="12dp"
         android:visibility="invisible" />
 
     <TextView
@@ -32,57 +32,46 @@
         android:layout_height="wrap_content"
         android:text="@string/label_your_ip"
         android:textSize="16sp"
-        android:textColor="#757575" />
+        android:textColor="#757575"
+        android:layout_marginBottom="8dp" />
 
-    <LinearLayout
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_marginBottom="12dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:scrollbars="none"
+        android:fillViewport="true"
+        android:layout_marginBottom="16dp">
 
-        <HorizontalScrollView
-            android:layout_width="0dp"
+        <TextView
+            android:id="@+id/tvIpAddress"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:scrollbars="none"
-            android:fillViewport="true">
+            android:text="..."
+            android:textSize="36sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:maxLines="1"
+            android:gravity="center"
+            android:layout_gravity="center" />
+    </HorizontalScrollView>
 
-            <TextView
-                android:id="@+id/tvIpAddress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="..."
-                android:textSize="36sp"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:maxLines="1"
-                android:gravity="center"
-                android:layout_gravity="center" />
-        </HorizontalScrollView>
-
-        <ImageButton
-            android:id="@+id/btnCopy"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="8dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_copy"
-            android:scaleType="fitCenter"
-            android:contentDescription="Copy IP Address" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/tvLocation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="..."
-        android:textSize="18sp"
-        android:textColor="#424242"
-        android:gravity="center"
-        android:layout_marginBottom="48dp" />
+    <ImageButton
+        android:id="@+id/btnCopy"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_copy"
+        android:scaleType="fitCenter"
+        android:contentDescription="Copy IP Address"
+        android:layout_marginBottom="40dp" /> <TextView
+    android:id="@+id/tvLocation"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="..."
+    android:textSize="18sp"
+    android:textColor="#424242"
+    android:gravity="center"
+    android:layout_marginBottom="48dp" />
 
     <View
         android:layout_width="match_parent"

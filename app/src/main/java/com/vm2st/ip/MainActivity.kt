@@ -2,6 +2,8 @@ package com.vm2st.ip
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
@@ -10,9 +12,11 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -31,6 +35,7 @@ class MainActivity : Activity() {
     private lateinit var spinnerSource: Spinner
     private lateinit var btnConfigure: Button
     private lateinit var btnRefresh: Button
+    private lateinit var btnCopy: ImageButton
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private var customUrl: String = "https://api.ipify.org"
@@ -41,7 +46,7 @@ class MainActivity : Activity() {
         "https://ifconfig.me/ip",
         "https://ident.me",
         "https://api.seeip.org",
-        "https://wtfismyip.com/text",
+        "https://ipgeo.wtfismyip.com/text",
         "https://v4.ident.me",
         "https://checkip.amazonaws.com",
         "https://ip.tyk.nu",
@@ -52,7 +57,6 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Инициализация View элементов
         tvIpAddress = findViewById(R.id.tvIpAddress)
         tvLocation = findViewById(R.id.tvLocation)
         tvError = findViewById(R.id.tvError)
@@ -60,15 +64,14 @@ class MainActivity : Activity() {
         spinnerSource = findViewById(R.id.spinnerSource)
         btnConfigure = findViewById(R.id.btnConfigure)
         btnRefresh = findViewById(R.id.btnRefresh)
+        btnCopy = findViewById(R.id.btnCopy)
 
-        // Восстановление кастомного URL, если он был сохранен ранее
         val prefs = getSharedPreferences("IP_PREFS", Context.MODE_PRIVATE)
         customUrl = prefs.getString("custom_url", "https://api.ipify.org") ?: "https://api.ipify.org"
 
-        // Логика переключения источников в Spinner
         spinnerSource.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (position == 10) { // Индекс пункта "Custom..."
+                if (position == 10) {
                     btnConfigure.visibility = View.VISIBLE
                 } else {
                     btnConfigure.visibility = View.GONE
@@ -78,17 +81,22 @@ class MainActivity : Activity() {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
-        // Кнопка "Настроить..." для пользовательского URL
-        btnConfigure.setOnClickListener {
-            showCustomUrlDialog()
+        btnConfigure.setOnClickListener { showCustomUrlDialog() }
+        btnRefresh.setOnClickListener { fetchIpData() }
+
+        // Логика кнопки копирования в буфер обмена
+        btnCopy.setOnClickListener {
+            val ipText = tvIpAddress.text.toString().trim()
+            if (ipText.isNotEmpty() && ipText != "...") {
+                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = ClipData.newPlainText("Identified IP Address", ipText)
+                clipboard.setPrimaryClip(clip)
+
+                // Легковесный нативный фидбек пользователю
+                Toast.makeText(this, getString(R.string.msg_copied), Toast.LENGTH_SHORT).show()
+            }
         }
 
-        // Кнопка "Обновить"
-        btnRefresh.setOnClickListener {
-            fetchIpData()
-        }
-
-        // Первичный запуск при входе
         fetchIpData()
     }
 
@@ -118,7 +126,6 @@ class MainActivity : Activity() {
     }
 
     private fun fetchIpData() {
-        // Сброс UI перед запросом
         tvError.text = ""
         progressBar.visibility = View.VISIBLE
         tvIpAddress.text = "..."
@@ -129,15 +136,12 @@ class MainActivity : Activity() {
 
         thread {
             try {
-                // 1. Получаем IP-адрес из выбранного источника
                 val ip = executeHttpGet(targetUrl).trim()
 
-                // Валидация на случай, если вернулся пустой или некорректный ответ
                 if (ip.isEmpty() || ip.length > 45) {
                     throw Exception("Invalid response from source")
                 }
 
-                // 2. Получаем геопозицию по найденному IP через geojs.io
                 val geoUrl = "https://get.geojs.io/v1/ip/geo/$ip.json"
                 val geoJsonString = executeHttpGet(geoUrl)
 
@@ -148,7 +152,6 @@ class MainActivity : Activity() {
 
                 val flagEmoji = getFlagEmoji(countryCode)
 
-                // Формируем красивую строку локации: Флаг Country, Region
                 val locationBuilder = StringBuilder()
                 if (flagEmoji.isNotEmpty()) locationBuilder.append("$flagEmoji ")
                 if (countryName.isNotEmpty()) locationBuilder.append(countryName)
@@ -159,7 +162,6 @@ class MainActivity : Activity() {
 
                 val locationResult = if (locationBuilder.isEmpty()) getString(R.string.unknown_location) else locationBuilder.toString()
 
-                // Обновляем UI в главном потоке
                 mainHandler.post {
                     tvIpAddress.text = ip
                     tvLocation.text = locationResult
@@ -167,13 +169,11 @@ class MainActivity : Activity() {
                 }
 
             } catch (e: SocketTimeoutException) {
-                // Обработка таймаута в 5 секунд
                 mainHandler.post {
                     tvError.text = getString(R.string.error_timeout)
                     progressBar.visibility = View.INVISIBLE
                 }
             } catch (e: Exception) {
-                // Любая другая ошибка сети или парсинга
                 mainHandler.post {
                     tvError.text = String.format(getString(R.string.error_generic), e.localizedMessage ?: "Unknown error")
                     progressBar.visibility = View.INVISIBLE
@@ -182,7 +182,6 @@ class MainActivity : Activity() {
         }
     }
 
-    // Универсальный легковесный HTTP GET метод со строгим таймаутом в 5000мс
     private fun executeHttpGet(urlString: String): String {
         val url = URL(urlString)
         val connection = url.openConnection() as HttpURLConnection
@@ -208,7 +207,6 @@ class MainActivity : Activity() {
         }
     }
 
-    // Магическая конвертация ISO кода страны (например, "US") в соответствующий флаг-эмодзи
     private fun getFlagEmoji(countryCode: String): String {
         if (countryCode.length != 2) return ""
         val codeUppercase = countryCode.uppercase(Locale.US)

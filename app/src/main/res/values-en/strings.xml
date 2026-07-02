@@ -12,6 +12,7 @@
     <string name="error_generic">Error: %s</string>
     <string name="loading">Loading…</string>
     <string name="unknown_location">Unknown location</string>
+    <string name="msg_copied">IP address copied to clipboard</string>
 
     <string-array name="ip_sources">
         <item>ipify.org</item>

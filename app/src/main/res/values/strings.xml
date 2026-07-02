@@ -12,6 +12,7 @@
     <string name="error_generic">Ошибка: %s</string>
     <string name="loading">Загрузка…</string>
     <string name="unknown_location">Неизвестное местоположение</string>
+    <string name="msg_copied">IP-адрес скопирован в буфер</string>
 
     <string-array name="ip_sources">
         <item>ipify.org</item>

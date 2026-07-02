@@ -11,8 +11,8 @@ android {
         applicationId = "com.vm2st.ip"
         minSdk = 21
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
     }
 
     buildTypes {
@@ -26,13 +26,11 @@ android {
         }
     }
 
-    // Совместимость для Java компилятора
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
 
-    // Совместимость для Kotlin компилятора
     kotlinOptions {
         jvmTarget = "21"
     }

@@ -46,7 +46,7 @@ class MainActivity : Activity() {
         "https://ifconfig.me/ip",
         "https://ident.me",
         "https://api.seeip.org",
-        "https://ipgeo.wtfismyip.com/text",
+        "https://text.wtfismyip.com",
         "https://v4.ident.me",
         "https://checkip.amazonaws.com",
         "https://ip.tyk.nu",

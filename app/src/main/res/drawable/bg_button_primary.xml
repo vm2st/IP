@@ -1,0 +1,7 @@
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#1AFFFFFF">
+    <item><selector>
+        <item android:state_enabled="false"><shape><solid android:color="?attr/appDisabledSurface"/><corners android:radius="8dp"/></shape></item>
+        <item android:state_focused="true"><shape><solid android:color="?attr/appPrimary"/><corners android:radius="8dp"/><stroke android:width="2dp" android:color="?attr/appOnPrimary"/></shape></item>
+        <item><shape><solid android:color="?attr/appPrimary"/><corners android:radius="8dp"/></shape></item>
+    </selector></item>
+</ripple>

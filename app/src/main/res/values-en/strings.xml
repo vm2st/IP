@@ -1,30 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Your Public IP</string>
-    <string name="label_your_ip">Your IP:</string>
+    <string name="screen_title">Public IP</string>
+    <string name="label_your_ip">Your IP</string>
     <string name="btn_refresh">Refresh</string>
-    <string name="label_select_source">Select IP Source:</string>
-    <string name="btn_configure">Configure…</string>
-    <string name="dialog_title">Custom Source</string>
-    <string name="dialog_hint">https://example.com</string>
-    <string name="dialog_ok">OK</string>
+    <string name="label_select_source">IP source</string>
+    <string name="source_custom">Custom…</string>
+    <string name="btn_configure">Configure source</string>
+    <string name="copy_ip">Copy IP</string>
+    <string name="dialog_title">Custom source</string>
+    <string name="dialog_hint">https://example.com/ip</string>
+    <string name="dialog_save">Save</string>
     <string name="dialog_cancel">Cancel</string>
-    <string name="error_timeout">Connection timeout (5s exceeded)</string>
-    <string name="error_generic">Error: %s</string>
-    <string name="loading">Loading…</string>
+    <string name="invalid_url">Use a public HTTPS server URL without a username or password.</string>
+    <string name="geo_enabled">IP geolocation</string>
+    <string name="geo_unavailable">Location unavailable</string>
     <string name="unknown_location">Unknown location</string>
-    <string name="msg_copied">IP address copied to clipboard</string>
-
-    <string-array name="ip_sources">
-        <item>ipify.org</item>
-        <item>icanhazip.com</item>
-        <item>ifconfig.me</item>
-        <item>ident.me</item>
-        <item>seeip.org</item>
-        <item>wtfismyip.com</item>
-        <item>v4.ident.me</item>
-        <item>checkip.amazonaws.com</item>
-        <item>ip.tyk.nu</item>
-        <item>wgetip.com</item>
-        <item>Custom…</item>
-    </string-array>
+    <string name="loading">Loading…</string>
+    <string name="loading_geo">Finding location…</string>
+    <string name="ip_unavailable">No data</string>
+    <string name="msg_copied">IP address copied</string>
+    <string name="copy_failed">Could not copy the IP address</string>
+    <string name="error_network">Could not connect. Check your network or choose another source.</string>
+    <string name="error_timeout">The server did not respond in time. Try again.</string>
+    <string name="error_http">Server error (HTTP %1$d).</string>
+    <string name="error_invalid_ip">The source did not return a public IP address.</string>
+    <string name="error_response">Invalid server response.</string>
+    <string name="error_response_large">The server response is too large.</string>
+    <string name="error_redirect">Unsafe redirect or too many redirects.</string>
+    <string name="theme_title">Theme</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_burgundy">Burgundy</string>
 </resources>

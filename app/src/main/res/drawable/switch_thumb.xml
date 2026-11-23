@@ -1,0 +1,10 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true"><shape android:shape="oval">
+        <size android:width="24dp" android:height="24dp"/><solid android:color="?attr/appSurface"/>
+        <stroke android:width="2dp" android:color="?attr/colorAccent"/>
+    </shape></item>
+    <item><shape android:shape="oval">
+        <size android:width="24dp" android:height="24dp"/><solid android:color="?attr/appSurface"/>
+        <stroke android:width="2dp" android:color="?attr/appSecondaryText"/>
+    </shape></item>
+</selector>

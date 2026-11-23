@@ -1,217 +1,241 @@
 package com.vm2st.ip
 
-import android.app.Activity
-import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.os.PersistableBundle
+import android.text.InputFilter
+import android.text.InputType
 import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.ProgressBar
+import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
-import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.SocketTimeoutException
-import java.util.Locale
-import kotlin.concurrent.thread
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatEditText
+import androidx.appcompat.widget.SwitchCompat
+import androidx.core.widget.doAfterTextChanged
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
+import kotlin.math.max
+import kotlin.math.roundToInt
 
-class MainActivity : Activity() {
-
-    private lateinit var tvIpAddress: TextView
-    private lateinit var tvLocation: TextView
-    private lateinit var tvError: TextView
-    private lateinit var progressBar: ProgressBar
-    private lateinit var spinnerSource: Spinner
-    private lateinit var btnConfigure: Button
-    private lateinit var btnRefresh: Button
-    private lateinit var btnCopy: ImageButton
-
-    private val mainHandler = Handler(Looper.getMainLooper())
-    private var customUrl: String = "https://api.ipify.org"
-
-    private val sourceUrls = arrayOf(
-        "https://api.ipify.org",
-        "https://icanhazip.com",
-        "https://ifconfig.me/ip",
-        "https://ident.me",
-        "https://api.seeip.org",
-        "https://text.wtfismyip.com",
-        "https://v4.ident.me",
-        "https://checkip.amazonaws.com",
-        "https://ip.tyk.nu",
-        "https://wgetip.com"
-    )
+class MainActivity : AppCompatActivity() {
+    private lateinit var settings: IpSettings
+    private lateinit var model: IpViewModel
+    private lateinit var appliedTheme: AppTheme
+    private lateinit var ipView: TextView
+    private lateinit var locationView: TextView
+    private lateinit var errorView: TextView
+    private lateinit var copyButton: Button
+    private lateinit var refreshButton: Button
+    private lateinit var configureButton: Button
+    private lateinit var sourceSpinner: Spinner
+    private lateinit var geoSwitch: SwitchCompat
+    private lateinit var progress: View
+    private var dialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        settings = IpSettings(this)
+        appliedTheme = settings.theme
+        setTheme(appliedTheme.style)
+        delegate.localNightMode = appliedTheme.nightMode
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = appliedTheme == AppTheme.LIGHT
+            isAppearanceLightNavigationBars = appliedTheme == AppTheme.LIGHT
+        }
+        configureLegacySystemBars()
         setContentView(R.layout.activity_main)
+        installInsets()
+        model = ViewModelProvider(this, object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                IpViewModel(settings, (application as IpApplication).repository) as T
+        })[IpViewModel::class.java]
 
-        tvIpAddress = findViewById(R.id.tvIpAddress)
-        tvLocation = findViewById(R.id.tvLocation)
-        tvError = findViewById(R.id.tvError)
-        progressBar = findViewById(R.id.progressBar)
-        spinnerSource = findViewById(R.id.spinnerSource)
-        btnConfigure = findViewById(R.id.btnConfigure)
-        btnRefresh = findViewById(R.id.btnRefresh)
-        btnCopy = findViewById(R.id.btnCopy)
-
-        val prefs = getSharedPreferences("IP_PREFS", Context.MODE_PRIVATE)
-        customUrl = prefs.getString("custom_url", "https://api.ipify.org") ?: "https://api.ipify.org"
-
-        spinnerSource.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        ipView = findViewById(R.id.tvIpAddress)
+        locationView = findViewById(R.id.tvLocation)
+        errorView = findViewById(R.id.tvError)
+        copyButton = findViewById(R.id.btnCopy)
+        refreshButton = findViewById(R.id.btnRefresh)
+        configureButton = findViewById(R.id.btnConfigure)
+        sourceSpinner = findViewById(R.id.spinnerSource)
+        geoSwitch = findViewById(R.id.switchGeo)
+        progress = findViewById(R.id.progressBar)
+        val labels = IpSources.all.map { if (it.id == IpSources.CUSTOM) getString(R.string.source_custom) else it.title }
+        sourceSpinner.adapter = ArrayAdapter(this, R.layout.spinner_item, labels).apply {
+            setDropDownViewResource(R.layout.spinner_dropdown_item)
+        }
+        sourceSpinner.setSelection(IpSources.all.indexOfFirst { it.id == model.state.value.sourceId })
+        sourceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (position == 10) {
-                    btnConfigure.visibility = View.VISIBLE
-                } else {
-                    btnConfigure.visibility = View.GONE
-                }
-                fetchIpData()
+                IpSources.all.getOrNull(position)?.let { model.selectSource(it.id) }
             }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
+            override fun onNothingSelected(parent: AdapterView<*>?) = Unit
         }
-
-        btnConfigure.setOnClickListener { showCustomUrlDialog() }
-        btnRefresh.setOnClickListener { fetchIpData() }
-
-        // Логика кнопки копирования в буфер обмена
-        btnCopy.setOnClickListener {
-            val ipText = tvIpAddress.text.toString().trim()
-            if (ipText.isNotEmpty() && ipText != "...") {
-                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                val clip = ClipData.newPlainText("Identified IP Address", ipText)
-                clipboard.setPrimaryClip(clip)
-
-                // Легковесный нативный фидбек пользователю
-                Toast.makeText(this, getString(R.string.msg_copied), Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        fetchIpData()
-    }
-
-    private fun showCustomUrlDialog() {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle(getString(R.string.dialog_title))
-
-        val input = EditText(this)
-        input.setText(customUrl)
-        input.hint = getString(R.string.dialog_hint)
-        builder.setView(input)
-
-        builder.setPositiveButton(getString(R.string.dialog_ok)) { dialog, _ ->
-            val text = input.text.toString().trim()
-            if (text.isNotEmpty()) {
-                customUrl = text
-                getSharedPreferences("IP_PREFS", Context.MODE_PRIVATE)
-                    .edit()
-                    .putString("custom_url", customUrl)
-                    .apply()
-                fetchIpData()
-            }
-            dialog.dismiss()
-        }
-        builder.setNegativeButton(getString(R.string.dialog_cancel)) { dialog, _ -> dialog.cancel() }
-        builder.show()
-    }
-
-    private fun fetchIpData() {
-        tvError.text = ""
-        progressBar.visibility = View.VISIBLE
-        tvIpAddress.text = "..."
-        tvLocation.text = "..."
-
-        val selectedPosition = spinnerSource.selectedItemPosition
-        val targetUrl = if (selectedPosition == 10) customUrl else sourceUrls[selectedPosition]
-
-        thread {
-            try {
-                val ip = executeHttpGet(targetUrl).trim()
-
-                if (ip.isEmpty() || ip.length > 45) {
-                    throw Exception("Invalid response from source")
-                }
-
-                val geoUrl = "https://get.geojs.io/v1/ip/geo/$ip.json"
-                val geoJsonString = executeHttpGet(geoUrl)
-
-                val json = JSONObject(geoJsonString)
-                val countryName = json.optString("country", "")
-                val countryCode = json.optString("country_code", "")
-                val region = json.optString("region", "")
-
-                val flagEmoji = getFlagEmoji(countryCode)
-
-                val locationBuilder = StringBuilder()
-                if (flagEmoji.isNotEmpty()) locationBuilder.append("$flagEmoji ")
-                if (countryName.isNotEmpty()) locationBuilder.append(countryName)
-                if (region.isNotEmpty()) {
-                    if (locationBuilder.isNotEmpty()) locationBuilder.append(", ")
-                    locationBuilder.append(region)
-                }
-
-                val locationResult = if (locationBuilder.isEmpty()) getString(R.string.unknown_location) else locationBuilder.toString()
-
-                mainHandler.post {
-                    tvIpAddress.text = ip
-                    tvLocation.text = locationResult
-                    progressBar.visibility = View.INVISIBLE
-                }
-
-            } catch (e: SocketTimeoutException) {
-                mainHandler.post {
-                    tvError.text = getString(R.string.error_timeout)
-                    progressBar.visibility = View.INVISIBLE
-                }
-            } catch (e: Exception) {
-                mainHandler.post {
-                    tvError.text = String.format(getString(R.string.error_generic), e.localizedMessage ?: "Unknown error")
-                    progressBar.visibility = View.INVISIBLE
-                }
-            }
+        findViewById<View>(R.id.btnTheme).setOnClickListener { showThemeChooser() }
+        refreshButton.setOnClickListener { model.refresh() }
+        copyButton.setOnClickListener { copyAddress() }
+        configureButton.setOnClickListener { showCustomSource() }
+        geoSwitch.setOnCheckedChangeListener { _, checked -> model.setGeoEnabled(checked) }
+        render(model.state.value)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) { model.state.collect(::render) }
         }
     }
 
-    private fun executeHttpGet(urlString: String): String {
-        val url = URL(urlString)
-        val connection = url.openConnection() as HttpURLConnection
-        connection.requestMethod = "GET"
-        connection.connectTimeout = 5000
-        connection.readTimeout = 5000
-        connection.doInput = true
+    override fun onStart() {
+        super.onStart()
+        model.refreshIfStale()
+    }
 
-        val responseCode = connection.responseCode
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            val reader = BufferedReader(InputStreamReader(connection.inputStream))
-            val response = StringBuilder()
-            var line: String?
-            while (reader.readLine().also { line = it } != null) {
-                response.append(line).append("\n")
+    @Suppress("DEPRECATION") // Light system-bar icons are unavailable on these older releases.
+    private fun configureLegacySystemBars() {
+        if (appliedTheme != AppTheme.LIGHT) return
+        val colors = obtainStyledAttributes(intArrayOf(R.attr.appPrimary))
+        val primary = colors.getColor(0, android.graphics.Color.BLACK)
+        colors.recycle()
+        if (Build.VERSION.SDK_INT < 23) window.statusBarColor = primary
+        if (Build.VERSION.SDK_INT < 26) window.navigationBarColor = primary
+    }
+
+    private fun installInsets() {
+        val root = findViewById<View>(R.id.rootScroll)
+        val left = root.paddingLeft; val top = root.paddingTop
+        val right = root.paddingRight; val bottom = root.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+            view.setPadding(left + bars.left, top + bars.top, right + bars.right, bottom + max(bars.bottom, ime.bottom))
+            insets
+        }
+        ViewCompat.requestApplyInsets(root)
+    }
+
+    private fun render(state: IpUiState) {
+        // Soft line-break opportunities after IPv6 colons; clipboard/accessibility keep the exact literal.
+        ipView.text = state.ip?.value?.replace(":", ":\u200B")
+            ?: getString(if (state.loadingIp) R.string.loading else R.string.ip_unavailable)
+        ipView.contentDescription = state.ip?.value
+        copyButton.isEnabled = state.ip != null
+        refreshButton.isEnabled = !state.loadingIp
+        progress.isVisible = state.loadingIp || state.loadingGeo
+        configureButton.isVisible = state.sourceId == IpSources.CUSTOM
+        geoSwitch.isChecked = state.geoEnabled
+        val selection = IpSources.all.indexOfFirst { it.id == state.sourceId }
+        if (sourceSpinner.selectedItemPosition != selection) sourceSpinner.setSelection(selection)
+        locationView.isVisible = state.geoEnabled && state.ip != null
+        locationView.text = when {
+            state.loadingGeo -> getString(R.string.loading_geo)
+            state.geoFailed -> getString(R.string.geo_unavailable)
+            else -> state.location?.label?.ifBlank { getString(R.string.unknown_location) }.orEmpty()
+        }
+        errorView.isVisible = state.error != null
+        errorView.text = state.error?.let(::errorText).orEmpty()
+    }
+
+    private fun errorText(failure: LookupFailure): String = when (failure.error) {
+        LookupError.INVALID_URL -> getString(R.string.invalid_url)
+        LookupError.TIMEOUT -> getString(R.string.error_timeout)
+        LookupError.HTTP -> getString(R.string.error_http, failure.status ?: 0)
+        LookupError.INVALID_IP -> getString(R.string.error_invalid_ip)
+        LookupError.INVALID_RESPONSE -> getString(R.string.error_response)
+        LookupError.RESPONSE_TOO_LARGE -> getString(R.string.error_response_large)
+        LookupError.REDIRECT -> getString(R.string.error_redirect)
+        LookupError.NETWORK -> getString(R.string.error_network)
+    }
+
+    private fun showThemeChooser() {
+        if (dialog?.isShowing == true) return
+        val labels = arrayOf(getString(R.string.theme_light), getString(R.string.theme_dark), getString(R.string.theme_burgundy))
+        dialog = AlertDialog.Builder(this).setTitle(R.string.theme_title)
+            .setSingleChoiceItems(labels, appliedTheme.ordinal) { chooser, index ->
+                val theme = AppTheme.entries.getOrNull(index) ?: return@setSingleChoiceItems
+                chooser.dismiss()
+                if (theme != appliedTheme) {
+                    settings.theme = theme
+                    recreate() // Retained ViewModel: no extra request, address or location lost.
+                }
+            }.setNegativeButton(R.string.dialog_cancel, null).create().also {
+                it.setOnDismissListener { dialog = null }
+                it.show()
             }
-            reader.close()
-            connection.disconnect()
-            return response.toString()
-        } else {
-            connection.disconnect()
-            throw Exception("HTTP Error code: $responseCode")
+    }
+
+    @Suppress("DEPRECATION") // adjustResize remains necessary for older Android dialog windows.
+    private fun showCustomSource() {
+        if (dialog?.isShowing == true) return
+        val input = AppCompatEditText(this).apply {
+            id = R.id.customUrlInput
+            setText(model.customUrl())
+            hint = getString(R.string.dialog_hint)
+            contentDescription = getString(R.string.dialog_title)
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            filters = arrayOf(InputFilter.LengthFilter(UrlPolicy.MAX_URL_LENGTH))
+            textSize = 16f
+            maxLines = 4
+            isSingleLine = false
+            isSaveEnabled = false
+            if (Build.VERSION.SDK_INT >= 26) importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO
+            setSelectAllOnFocus(true)
+        }
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            val padding = (24 * resources.displayMetrics.density).roundToInt()
+            setPadding(padding, padding / 2, padding, 0)
+            addView(input, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+        }
+        dialog = AlertDialog.Builder(this).setTitle(R.string.dialog_title).setView(container)
+            .setPositiveButton(R.string.dialog_save, null).setNegativeButton(R.string.dialog_cancel, null)
+            .create().also { alert ->
+                alert.setOnDismissListener { dialog = null }
+                alert.show()
+                alert.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+                input.doAfterTextChanged { input.error = null }
+                // Install immediately after show(): never let the default button dismiss invalid input.
+                alert.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                    if (model.saveCustomUrl(input.text?.toString().orEmpty())) alert.dismiss()
+                    else input.error = getString(R.string.invalid_url)
+                }
+            }
+    }
+
+    private fun copyAddress() {
+        val address = model.state.value.ip ?: return
+        try {
+            val clip = ClipData.newPlainText(getString(R.string.label_your_ip), address.value)
+            if (Build.VERSION.SDK_INT >= 24) {
+                clip.description.extras = PersistableBundle().apply { putBoolean("android.content.extra.IS_SENSITIVE", true) }
+            }
+            (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(clip)
+            // Android 13+ shows its own clipboard confirmation.
+            if (Build.VERSION.SDK_INT < 33) Toast.makeText(this, R.string.msg_copied, Toast.LENGTH_SHORT).show()
+        } catch (e: RuntimeException) {
+            Toast.makeText(this, R.string.copy_failed, Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun getFlagEmoji(countryCode: String): String {
-        if (countryCode.length != 2) return ""
-        val codeUppercase = countryCode.uppercase(Locale.US)
-        val firstLetter = Character.codePointAt(codeUppercase, 0) - 0x41 + 0x1F1E6
-        val secondLetter = Character.codePointAt(codeUppercase, 1) - 0x41 + 0x1F1E6
-        return String(Character.toChars(firstLetter)) + String(Character.toChars(secondLetter))
+    override fun onDestroy() {
+        dialog?.dismiss()
+        dialog = null
+        super.onDestroy()
     }
 }

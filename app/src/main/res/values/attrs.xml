@@ -1,0 +1,13 @@
+<resources>
+    <attr name="appBackground" format="color" />
+    <attr name="appSurface" format="color" />
+    <attr name="appText" format="color" />
+    <attr name="appSecondaryText" format="color" />
+    <attr name="appStroke" format="color" />
+    <attr name="appPrimary" format="color" />
+    <attr name="appOnPrimary" format="color" />
+    <attr name="appPressed" format="color" />
+    <attr name="appDisabledSurface" format="color" />
+    <attr name="appDisabledText" format="color" />
+    <attr name="appError" format="color" />
+</resources>

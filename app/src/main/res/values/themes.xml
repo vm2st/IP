@@ -1,5 +1,89 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.ВашПубличныйIP" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.MyIP.Base" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowBackground">?attr/appBackground</item>
+        <item name="android:colorBackground">?attr/appBackground</item>
+        <item name="android:textColorPrimary">?attr/appText</item>
+        <item name="android:textColorSecondary">?attr/appSecondaryText</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">?attr/appBackground</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.MyIP.Dialog</item>
+        <item name="buttonStyle">@style/Widget.MyIP.Button</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
+    <style name="ThemeOverlay.MyIP.Dialog" parent="ThemeOverlay.AppCompat.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/bg_dialog</item>
+        <item name="android:colorBackground">?attr/appSurface</item>
+        <item name="colorBackgroundFloating">?attr/appSurface</item>
+        <item name="android:textColorPrimary">?attr/appText</item>
+        <item name="android:textColorSecondary">?attr/appSecondaryText</item>
+        <item name="android:colorAccent">?attr/colorAccent</item>
+    </style>
+    <style name="Widget.MyIP.Button" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_button</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:textColor">@color/button_text</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:minWidth">48dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:gravity">center</item>
+    </style>
+    <style name="Widget.MyIP.Button.Primary" parent="Widget.MyIP.Button">
+        <item name="android:background">@drawable/bg_button_primary</item>
+        <item name="android:textColor">@color/primary_button_text</item>
+    </style>
+    <style name="Theme.MyIP.Light" parent="Theme.MyIP.Base">
+        <item name="appBackground">#F6F7F9</item>
+        <item name="appSurface">#FFFFFF</item>
+        <item name="appText">#20242B</item>
+        <item name="appSecondaryText">#575F6B</item>
+        <item name="appStroke">#7C8797</item>
+        <item name="appPrimary">#245DA8</item>
+        <item name="appOnPrimary">#FFFFFF</item>
+        <item name="appPressed">#E0EAF7</item>
+        <item name="appDisabledSurface">#E7EBF0</item>
+        <item name="appDisabledText">#606A77</item>
+        <item name="appError">#A52222</item>
+        <item name="colorAccent">#245DA8</item>
+        <item name="colorControlNormal">#575F6B</item>
+        <item name="colorControlActivated">#245DA8</item>
+    </style>
+    <style name="Theme.MyIP.Dark" parent="Theme.MyIP.Base">
+        <item name="appBackground">#14171B</item>
+        <item name="appSurface">#20252D</item>
+        <item name="appText">#F4F6FA</item>
+        <item name="appSecondaryText">#B8C1CD</item>
+        <item name="appStroke">#778495</item>
+        <item name="appPrimary">#2C63A5</item>
+        <item name="appOnPrimary">#FFFFFF</item>
+        <item name="appPressed">#35455A</item>
+        <item name="appDisabledSurface">#2A3038</item>
+        <item name="appDisabledText">#9AA4B1</item>
+        <item name="appError">#FFB4AB</item>
+        <item name="colorAccent">#9AC5FF</item>
+        <item name="colorControlNormal">#B8C1CD</item>
+        <item name="colorControlActivated">#9AC5FF</item>
+    </style>
+    <style name="Theme.MyIP.Burgundy" parent="Theme.MyIP.Base">
+        <item name="appBackground">#211114</item>
+        <item name="appSurface">#351C21</item>
+        <item name="appText">#FFF3F4</item>
+        <item name="appSecondaryText">#DDC0C4</item>
+        <item name="appStroke">#AE7C84</item>
+        <item name="appPrimary">#892929</item>
+        <item name="appOnPrimary">#FFFFFF</item>
+        <item name="appPressed">#603039</item>
+        <item name="appDisabledSurface">#45282E</item>
+        <item name="appDisabledText">#C4A3A9</item>
+        <item name="appError">#FFB4AB</item>
+        <item name="colorAccent">#F2B6BA</item>
+        <item name="colorControlNormal">#DDC0C4</item>
+        <item name="colorControlActivated">#F2B6BA</item>
+    </style>
 </resources>

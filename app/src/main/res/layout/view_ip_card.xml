@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/ipCard" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:padding="20dp" android:background="@drawable/bg_surface" android:layout_marginBottom="24dp">
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/label_your_ip" android:textSize="16sp" android:gravity="center" android:textColor="?attr/appSecondaryText" android:layout_marginBottom="12dp" />
+    <TextView android:id="@+id/tvIpAddress" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/ip_unavailable" android:textSize="28sp" android:fontFamily="monospace" android:textColor="?attr/appText" android:gravity="center" android:textDirection="ltr" android:layoutDirection="ltr" android:saveEnabled="false" android:layout_marginBottom="12dp" />
+    <androidx.appcompat.widget.AppCompatButton android:id="@+id/btnCopy" style="@style/Widget.MyIP.Button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/copy_ip" android:enabled="false" />
+    <TextView android:id="@+id/tvLocation" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:textSize="16sp" android:textColor="?attr/appSecondaryText" android:gravity="center" android:saveEnabled="false" android:visibility="gone" />
+</LinearLayout>
+        

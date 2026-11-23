@@ -1,30 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Ваш Публичный IP</string>
-    <string name="label_your_ip">Ваш IP:</string>
+    <string name="screen_title">Публичный IP</string>
+    <string name="label_your_ip">Ваш IP</string>
     <string name="btn_refresh">Обновить</string>
-    <string name="label_select_source">Выберите источник IP:</string>
-    <string name="btn_configure">Настроить…</string>
+    <string name="label_select_source">Источник IP</string>
+    <string name="source_custom">Пользовательский…</string>
+    <string name="btn_configure">Настроить источник</string>
+    <string name="copy_ip">Копировать IP</string>
     <string name="dialog_title">Пользовательский источник</string>
-    <string name="dialog_hint">https://example.com</string>
-    <string name="dialog_ok">OK</string>
+    <string name="dialog_hint">https://example.com/ip</string>
+    <string name="dialog_save">Сохранить</string>
     <string name="dialog_cancel">Отмена</string>
-    <string name="error_timeout">Ошибка ожидания (превышено 5 сек)</string>
-    <string name="error_generic">Ошибка: %s</string>
+    <string name="invalid_url">Нужен HTTPS-адрес публичного сервера без логина и пароля.</string>
+    <string name="geo_enabled">Геолокация по IP</string>
+    <string name="geo_unavailable">Местоположение недоступно</string>
+    <string name="unknown_location">Местоположение неизвестно</string>
     <string name="loading">Загрузка…</string>
-    <string name="unknown_location">Неизвестное местоположение</string>
-    <string name="msg_copied">IP-адрес скопирован в буфер</string>
-
-    <string-array name="ip_sources">
-        <item>ipify.org</item>
-        <item>icanhazip.com</item>
-        <item>ifconfig.me</item>
-        <item>ident.me</item>
-        <item>seeip.org</item>
-        <item>wtfismyip.com</item>
-        <item>v4.ident.me</item>
-        <item>checkip.amazonaws.com</item>
-        <item>ip.tyk.nu</item>
-        <item>wgetip.com</item>
-        <item>Пользовательский…</item>
-    </string-array>
+    <string name="loading_geo">Определение местоположения…</string>
+    <string name="ip_unavailable">Нет данных</string>
+    <string name="msg_copied">IP-адрес скопирован</string>
+    <string name="copy_failed">Не удалось скопировать IP</string>
+    <string name="error_network">Не удалось подключиться. Проверьте сеть или выберите другой источник.</string>
+    <string name="error_timeout">Сервер не ответил вовремя. Попробуйте ещё раз.</string>
+    <string name="error_http">Ошибка сервера (HTTP %1$d).</string>
+    <string name="error_invalid_ip">Источник не вернул публичный IP-адрес.</string>
+    <string name="error_response">Некорректный ответ сервера.</string>
+    <string name="error_response_large">Ответ сервера слишком большой.</string>
+    <string name="error_redirect">Небезопасное перенаправление или слишком много переходов.</string>
+    <string name="theme_title">Тема</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="theme_burgundy">Бордовая</string>
 </resources>
